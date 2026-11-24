@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jual Barang - LokalShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; color: #0F172A; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen py-8 px-4">
+
+    <div class="max-w-2xl mx-auto">
+        <a href="/" class="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 mb-6">
+            ← Kembali ke Katalog
+        </a>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-emerald-600 text-white px-6 py-5">
+                <span class="text-xs font-semibold uppercase tracking-wider text-emerald-100">Listing Barang Baru</span>
+                <h1 class="text-xl font-bold mt-1">Pasang Iklan Barang Preloved / Lokal</h1>
+            </div>
+            
+            <form action="/barang/simpan" method="post" enctype="multipart/form-data" class="p-6 space-y-5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Barang</label>
+                    <input type="text" name="namaBarang" required placeholder="Contoh: Kalkulator Saintifik Casio fx-991ES"
+                           class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+
+                <!-- Kategori Barang & Kondisi -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kategori Barang</label>
+                        <select name="kategori" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="Elektronik & Gadget">Elektronik & Gadget</option>
+                            <option value="Buku & Alat Kuliah">Buku & Alat Kuliah</option>
+                            <option value="Perlengkapan Kos">Perlengkapan Kos</option>
+                            <option value="Fashion & Aksesoris">Fashion & Aksesoris</option>
+                            <option value="Hobi & Olahraga">Hobi & Olahraga</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kondisi Barang</label>
+                        <select name="kondisiBarang" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            <option value="Preloved">Preloved</option>
+                            <option value="Baru">Baru</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Input Harga Format Rupiah -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Harga Jual (Rupiah)</label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-3.5 text-sm font-bold text-slate-500">Rp</span>
+                        <input type="number" id="input-harga" name="harga" required min="1000" step="500" placeholder="50000"
+                               oninput="formatRupiahPreview(this.value)"
+                               class="w-full rounded-xl border border-slate-300 pl-10 pr-3.5 py-2.5 text-sm font-semibold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                    <p class="text-xs text-emerald-700 font-semibold mt-1">
+                        Terbaca: <span id="preview-rupiah">Rp 0</span>
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Deskripsi & Kelengkapan Barang</label>
+                    <textarea name="deskripsi" rows="3" required placeholder="Jelaskan kondisi fisik, kelengkapan, dan minus (jika ada)..."
+                              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+                </div>
+
+                <!-- Input Foto Barang (Upload File Wajib) -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                        📸 Upload Foto Barang (JPG / PNG) <span class="text-red-600">*</span>
+                    </label>
+
+                    <input type="file" name="fotoFile" accept="image/*" required onchange="previewFotoFile(this)"
+                           class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer">
+
+                    <!-- Preview Foto -->
+                    <div id="previewBox" class="hidden pt-2">
+                        <p class="text-[11px] text-slate-500 mb-1">Pratinjau Foto:</p>
+                        <img id="previewImg" src="" alt="Preview Foto" class="h-40 w-full object-cover rounded-xl border border-slate-200">
+                    </div>
+                </div>
+
+                <!-- Opsi Promosi Super Boost -->
+                <div class="p-4 rounded-xl bg-purple-50 border border-purple-200 flex items-start gap-3">
+                    <input type="checkbox" id="aktifkanBoost" name="aktifkanBoost" value="true"
+                           class="mt-1 w-4 h-4 text-purple-600 rounded border-purple-300 focus:ring-purple-500">
+                    <label for="aktifkanBoost" class="text-xs text-slate-700 cursor-pointer">
+                        <span class="font-bold text-purple-800 block text-sm">⚡ Aktifkan Super Boost (Rp 5.000 / 24 Jam)</span>
+                        Tampilkan barang ini di posisi teratas sebagai barang <strong>HOT</strong> setelah pembayaran QRIS selesai.
+                    </label>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-sm transition text-sm">
+                        Simpan & Publikasikan Barang
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function formatRupiahPreview(angka) {
+            const preview = document.getElementById('preview-rupiah');
+            if (!angka || angka <= 0) {
+                preview.textContent = 'Rp 0';
+                return;
+            }
+            const formatted = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(angka);
+            preview.textContent = formatted;
+        }
+
+        function previewFotoFile(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('previewBox').classList.remove('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>

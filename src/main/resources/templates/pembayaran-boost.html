@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran Super Boost - LokalShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; color: #0F172A; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen py-10 px-4 flex items-center justify-center">
+
+    <div class="max-w-md w-full bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <!-- Header -->
+        <div class="bg-purple-700 text-white px-6 py-5 text-center">
+            <span class="text-xs font-bold uppercase tracking-wider bg-purple-800 px-3 py-1 rounded-full">Aktivasi Promosi F12</span>
+            <h1 class="text-xl font-bold mt-2">Pembayaran Super Boost</h1>
+            <p class="text-xs text-purple-200 mt-1">Barang akan langsung tampil di urutan teratas (HOT) setelah dibayar</p>
+        </div>
+
+        <div class="p-6 space-y-5">
+            <!-- Info Barang -->
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center">
+                <div>
+                    <p class="text-xs text-slate-400">Listing yang Dipromosikan</p>
+                    <p class="font-bold text-slate-900 text-sm" th:text="${boost.barang.namaBarang}">Nama Barang</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-slate-400">Total Tagihan</p>
+                    <p class="font-bold text-purple-700 text-base">Rp 5.000</p>
+                </div>
+            </div>
+
+            <!-- Simulasi QRIS (Light Mode) -->
+            <div class="border-2 border-dashed border-slate-300 rounded-2xl p-5 text-center bg-white">
+                <span class="text-xs font-extrabold tracking-widest text-slate-800 block mb-2">QRIS LOKALSHOP</span>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=LOKALSHOP-SUPERBOOST-15000" 
+                     alt="QRIS Pembayaran" class="mx-auto w-40 h-40 rounded-lg border border-slate-100 p-1">
+                <p class="text-xs text-slate-500 mt-3">Scan menggunakan GoPay, OVO, DANA, ShopeePay, atau Mobile Banking</p>
+            </div>
+
+            <!-- Form Konfirmasi Pembayaran -->
+            <form th:action="@{/boost/bayar/{id}(id=${boost.idBoost})}" method="post" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1.5">Atau Pilih Metode Pembayaran Lainnya</label>
+                    <select name="metodeBayar" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                        <option value="QRIS">QRIS Instan </option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 rounded-xl shadow-sm transition text-sm">
+                    ✓ Saya Sudah Bayar & Terbitkan Barang
+                </button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
