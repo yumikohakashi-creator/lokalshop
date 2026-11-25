@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Barang - LokalShop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F8FAFC; color: #0F172A; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen py-8 px-4">
+
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-6">
+            <a href="/penjual" class="text-sm font-medium text-slate-500 hover:text-slate-900">← Kembali ke Dashboard Penjual</a>
+            <h1 class="text-2xl font-bold text-slate-900 mt-1">Edit Listing Barang</h1>
+            <p class="text-xs text-slate-500">Perbarui informasi produk preloved kamu di katalog LokalShop.</p>
+        </div>
+
+        <div th:if="${error}" class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-medium" th:text="${error}"></div>
+
+        <form th:action="@{/barang/update/{id}(id=${barang.idBarang})}" method="post" enctype="multipart/form-data"
+              class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Barang</label>
+                <input type="text" name="namaBarang" th:value="${barang.namaBarang}" required
+                       class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Kategori</label>
+                    <select name="kategori" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="Elektronik & Gadget" th:selected="${kategoriTerpilih == 'Elektronik & Gadget'}">Elektronik & Gadget</option>
+                        <option value="Perlengkapan Kos" th:selected="${kategoriTerpilih == 'Perlengkapan Kos'}">Perlengkapan Kos</option>
+                        <option value="Buku & Alat Kuliah" th:selected="${kategoriTerpilih == 'Buku & Alat Kuliah'}">Buku & Alat Kuliah</option>
+                        <option value="Fashion & Aksesoris" th:selected="${kategoriTerpilih == 'Fashion & Aksesoris'}">Fashion & Aksesoris</option>
+                        <option value="Lainnya" th:selected="${kategoriTerpilih == 'Lainnya'}">Lainnya</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Kondisi Barang</label>
+                    <select name="kondisiBarang" required class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="Preloved" th:selected="${barang.kondisiBarang == 'Preloved'}">Preloved (Bekas Layak Pakai)</option>
+                        <option value="Baru" th:selected="${barang.kondisiBarang == 'Baru'}">Baru</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Harga (Rp)</label>
+                <input type="number" name="harga" th:value="${barang.harga}" min="1000" step="500" required
+                       class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Deskripsi Kondisi & Kelengkapan</label>
+                <textarea name="deskripsi" rows="4" required th:text="${deskripsiBersih}"
+                          class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Ganti Foto Barang (Opsional)</label>
+                <div th:if="${barang.fotoBarang != null}" class="mb-2">
+                    <img th:src="${barang.fotoBarang}" alt="Foto saat ini" class="h-24 w-24 object-cover rounded-xl border border-slate-200">
+                    <p class="text-[11px] text-slate-400 mt-1">Biarkan kosong jika tidak ingin mengganti foto di atas.</p>
+                </div>
+                <input type="file" name="fotoFile" accept="image/*"
+                       class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <a href="/penjual" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+                    Batal
+                </a>
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-sm transition">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+
+</body>
+</html>

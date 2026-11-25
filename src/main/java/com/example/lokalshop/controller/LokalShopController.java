@@ -238,6 +238,111 @@ public class LokalShopController {
         }
     }
 
+    // ==========================================
+    // BAGIAN EDIT & HAPUS BARANG (CRUD)
+    // ==========================================
+
+    @GetMapping("/barang/edit/{idBarang}")
+    public String formEditBarang(@PathVariable Integer idBarang, HttpSession session, Model model) {
+        Pengguna userAktif = (Pengguna) session.getAttribute("userLogin");
+        if (userAktif == null) return "redirect:/login";
+
+        Barang barang = barangRepo.findById(idBarang).orElseThrow();
+        // Pastikan hanya pemilik barang yang bisa mengedit & barang belum terjual
+        if (!barang.getPenjual().getIdPengguna().equals(userAktif.getIdPengguna()) ||
+            "Terjual".equalsIgnoreCase(barang.getStatusListing())) {
+            return "redirect:/penjual";
+        }
+
+        // Pisahkan prefix [Kategori] dari deskripsi agar form edit rapi
+        String kategoriTerpilih = "Lainnya";
+        String deskripsiBersih = barang.getDeskripsi() != null ? barang.getDeskripsi() : "";
+        if (deskripsiBersih.startsWith("[") && deskripsiBersih.contains("] ")) {
+            int endIdx = deskripsiBersih.indexOf("] ");
+            kategoriTerpilih = deskripsiBersih.substring(1, endIdx);
+            deskripsiBersih = deskripsiBersih.substring(endIdx + 2);
+        }
+
+        model.addAttribute("userAktif", userAktif);
+        model.addAttribute("barang", barang);
+        model.addAttribute("kategoriTerpilih", kategoriTerpilih);
+        model.addAttribute("deskripsiBersih", deskripsiBersih);
+        return "edit-barang";
+    }
+
+    @PostMapping("/barang/update/{idBarang}")
+    public String updateBarang(
+            @PathVariable Integer idBarang,
+            @RequestParam String namaBarang,
+            @RequestParam String kategori,
+            @RequestParam BigDecimal harga,
+            @RequestParam String kondisiBarang,
+            @RequestParam String deskripsi,
+            @RequestParam(required = false) MultipartFile fotoFile,
+            HttpSession session,
+            RedirectAttributes redirectAttrs) {
+
+        Pengguna penjual = (Pengguna) session.getAttribute("userLogin");
+        if (penjual == null) return "redirect:/login";
+
+        Barang barang = barangRepo.findById(idBarang).orElseThrow();
+        if (!barang.getPenjual().getIdPengguna().equals(penjual.getIdPengguna())) {
+            return "redirect:/penjual";
+        }
+
+        barang.setNamaBarang(namaBarang);
+        barang.setHarga(harga);
+        barang.setKondisiBarang(kondisiBarang);
+        barang.setDeskripsi("[" + kategori + "] " + deskripsi);
+
+        // Jika pengguna mengunggah foto baru, perbarui foto; jika kosong, pertahankan foto lama
+        if (fotoFile != null && !fotoFile.isEmpty()) {
+            try {
+                String contentType = fotoFile.getContentType() != null ? fotoFile.getContentType() : "image/jpeg";
+                String base64Image = Base64.getEncoder().encodeToString(fotoFile.getBytes());
+                barang.setFotoBarang("data:" + contentType + ";base64," + base64Image);
+            } catch (Exception e) {
+                redirectAttrs.addFlashAttribute("error", "Gagal memperbarui file foto.");
+                return "redirect:/barang/edit/" + idBarang;
+            }
+        }
+
+        barangRepo.save(barang);
+        redirectAttrs.addFlashAttribute("sukses", "Data barang berhasil diperbarui!");
+        return "redirect:/penjual";
+    }
+
+    @PostMapping("/barang/hapus/{idBarang}")
+    public String hapusBarang(@PathVariable Integer idBarang, HttpSession session, RedirectAttributes redirectAttrs) {
+        Pengguna penjual = (Pengguna) session.getAttribute("userLogin");
+        if (penjual == null) return "redirect:/login";
+
+        Barang barang = barangRepo.findById(idBarang).orElseThrow();
+        if (!barang.getPenjual().getIdPengguna().equals(penjual.getIdPengguna())) {
+            return "redirect:/penjual";
+        }
+
+        // Cek relasi Foreign Key: jika barang sudah pernah diajukan transaksi, jangan dihapus paksa
+        boolean adaTransaksi = transaksiRepo.findAll().stream()
+                .anyMatch(t -> t.getBarang().getIdBarang().equals(idBarang));
+        if (adaTransaksi) {
+            redirectAttrs.addFlashAttribute("error", "Barang tidak dapat dihapus karena sudah memiliki riwayat transaksi COD.");
+            return "redirect:/penjual";
+        }
+
+        // Hapus data Super Boost terkait terlebih dahulu jika ada (menjaga integritas FK)
+        List<SuperBoost> boosts = boostRepo.findAll().stream()
+                .filter(b -> b.getBarang().getIdBarang().equals(idBarang))
+                .collect(Collectors.toList());
+        if (!boosts.isEmpty()) {
+            boostRepo.deleteAll(boosts);
+        }
+
+        barangRepo.delete(barang);
+        redirectAttrs.addFlashAttribute("sukses", "Barang berhasil dihapus dari lapak!");
+        return "redirect:/penjual";
+    }
+
     @GetMapping("/boost/pembayaran/{idBoost}")
     public String halamanPembayaranBoost(@PathVariable Integer idBoost, HttpSession session, Model model) {
         Pengguna userAktif = (Pengguna) session.getAttribute("userLogin");

@@ -13,6 +13,10 @@
 <body class="bg-slate-50 text-slate-900 min-h-screen py-8 px-4">
 
     <div class="max-w-5xl mx-auto">
+        <!-- Alert Notifikasi CRUD -->
+        <div th:if="${sukses}" class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-xs font-semibold" th:text="${sukses}"></div>
+        <div th:if="${error}" class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-semibold" th:text="${error}"></div>
+        
         <!-- Banner Identitas Akun & Peran Penjual -->
         <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 px-4 py-3 rounded-xl mb-6 flex flex-wrap items-center justify-between gap-2 text-xs">
             <span>👤 Akun Aktif: <strong th:text="${userAktif.nama}">Yumiko</strong> (<span th:text="${userAktif.email}">yumiko@mail.com</span>)</span>
